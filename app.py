@@ -128,6 +128,7 @@ async def websocket_asr(websocket: WebSocket):
     )
 
     sample_rate = 16000
+    # [左窗口, 当前窗口, 右窗口]
     chunk_size = [0, 10, 5]
     encoder_chunk_look_back = 4
     decoder_chunk_look_back = 1
@@ -147,8 +148,10 @@ async def websocket_asr(websocket: WebSocket):
     pcm_buffer = bytearray()
 
     # 这里把“一个 chunk 需要多少采样点”算出来。
-    # 官方示例中：chunk_stride = chunk_size[1] * 960
-    # 当 chunk_size[1] = 10 时，就是 9600 个采样点，也就是约 600ms。
+    # 官方示例中：chunk_stride = chunk_size[1] * 960（当前一次推理的时间窗口，1个单位 = 960个采样点）
+    # 当 chunk_size[1] = 10时，就是 9600 个采样点，也就是约（9600 / 16000） 600ms。
+    # 一个采样点 = 16bit = 2byte
+    # 返回的是一个chunk的字节大小
     def get_chunk_bytes() -> int:
         chunk_samples = chunk_size[1] * 960
         return chunk_samples * 2
