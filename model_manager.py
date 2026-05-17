@@ -9,6 +9,7 @@ class ModelManager:
     # 整个类只有一份
     # 初始值为 None，表示“模型还没加载”
     _model = None
+    _streaming_model = None
 
     # @classmethod 表示：
     # 这是“类方法”
@@ -76,3 +77,26 @@ class ModelManager:
         # 后续：
         # 直接返回已经存在的模型
         return cls._model
+
+    @classmethod
+    def get_streaming_model(cls):
+        # 这是给 WebSocket 实时识别准备的“流式模型”
+        #
+        # 注意：
+        # 这里和上面的 SenseVoiceSmall 不是同一个模型。
+        # 原因是：
+        # SenseVoiceSmall 更适合当前这个“整段音频上传后再识别”的接口，
+        # 而实时 WebSocket 场景更适合使用官方提供的 streaming 模型来学习。
+        if cls._streaming_model is None:
+            print("开始加载流式ASR模型...")
+
+            cls._streaming_model = AutoModel(
+                # 官方流式中文 ASR 模型
+                model="paraformer-zh-streaming",
+                trust_remote_code=True,
+                device="mps"
+            )
+
+            print("流式ASR模型加载完成")
+
+        return cls._streaming_model
