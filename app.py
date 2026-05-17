@@ -254,6 +254,7 @@ async def websocket_asr(websocket: WebSocket):
                 continue
 
             if message.get("bytes") is not None:
+                print("收到音频bytes:", len(message["bytes"]))
                 pcm_buffer.extend(message["bytes"])
 
                 # 这里不要写成 >=，而是写成 >。
@@ -264,6 +265,8 @@ async def websocket_asr(websocket: WebSocket):
                 # 那么我们只先处理前 2 个，最后 1 个保留。
                 # 等客户端发 end 时，再把最后 1 个用 is_final=True 推理。
                 while len(pcm_buffer) > get_chunk_bytes():
+                    print("当前buffer:", len(pcm_buffer))
+                    print("目标chunk:", get_chunk_bytes())
                     current = bytes(pcm_buffer[:get_chunk_bytes()])
                     del pcm_buffer[:get_chunk_bytes()]
                     await run_one_chunk(current, is_final=False)
