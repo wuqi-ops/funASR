@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 
 import numpy as np
@@ -6,6 +7,7 @@ from fastapi import FastAPI, UploadFile, File, WebSocket, WebSocketDisconnect
 from fastapi.concurrency import run_in_threadpool
 from model_manager import ModelManager
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
+import soundfile as sf
 
 app = FastAPI()
 
@@ -36,12 +38,12 @@ def pcm16le_to_float32(audio_bytes: bytes) -> np.ndarray:
 
 
 def stream_transcribe_audio(
-    audio_chunk: np.ndarray,
-    cache: dict,
-    is_final: bool,
-    chunk_size: list[int],
-    encoder_chunk_look_back: int,
-    decoder_chunk_look_back: int,
+        audio_chunk: np.ndarray,
+        cache: dict,
+        is_final: bool,
+        chunk_size: list[int],
+        encoder_chunk_look_back: int,
+        decoder_chunk_look_back: int,
 ) -> str:
     # 这个函数故意写成“同步函数”。
     #
@@ -286,3 +288,90 @@ async def websocket_asr(websocket: WebSocket):
         # 客户端主动断开连接时，FastAPI 会抛出这个异常。
         # 这里直接吞掉即可，因为这属于正常关闭场景。
         pass
+
+@app.post("/stereo/asr")
+async def asr_for_stereo(file: UploadFile = File(...)):
+    """
+    双声道 ASR 接口
+    左声道:
+        客服
+    右声道:
+        客户
+    """
+
+    # 保存上传文件
+    with tempfile.NamedTemporaryFile(
+            delete=False,
+            suffix=".wav"
+    ) as f:
+
+        f.write(await file.read())
+        temp_path = f.name
+
+    try:
+        # 在线程池中执行阻塞型 ASR
+        result = await run_in_threadpool(
+            transcribe_stereo_audio,
+            temp_path
+        )
+        return result
+    finally:
+        # 删除临时文件
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+
+def transcribe_stereo_audio(wav_path):
+    """双声道转写"""
+    # 获取模型
+    model = ModelManager.get_model()
+    # 读取 wav
+    audio, sr = sf.read(wav_path)
+
+    print("audio shape:", audio.shape)
+
+    print("sample rate:", sr)
+
+    # 检查是否双声道
+    # stereo:
+    # (samples, 2)
+    # mono:
+    # (samples,)
+    if len(audio.shape) != 2 or audio.shape[1] != 2:
+        raise ValueError("上传的不是双声道 wav 文件")
+
+    # 拆分左右声道
+    left_channel = audio[:, 0]
+    right_channel = audio[:, 1]
+
+    # 左声道 ASR（客服）
+
+    left_result = model.generate(
+        input=left_channel,
+        batch_size_s=0
+    )
+
+    # 右声道 ASR（客户）
+    right_result = model.generate(
+        input=right_channel,
+        batch_size_s=0
+    )
+
+    # 提取文本
+    # 不同 FunASR 版本
+    # 返回结构可能略有区别
+    left_text = left_result[0]["text"]
+
+    right_text = right_result[0]["text"]
+
+    return {
+        "sample_rate": sr,
+        "customer_service": {
+            "channel": "left",
+            "text": left_text
+        },
+        "customer": {
+            "channel": "right",
+            "text": right_text
+        }
+    }

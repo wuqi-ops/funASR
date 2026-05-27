@@ -28,7 +28,7 @@ async def stream_wav(wav_path: str):
         # 发送 start
         await ws.send(json.dumps({
             "event": "start",
-            "sample_rate": 8000,   # 你的wav是8k
+            "sample_rate": 8000,  # 你的wav是8k
             "chunk_size": [0, 10, 5],
             "encoder_chunk_look_back": 4,
             "decoder_chunk_look_back": 1
