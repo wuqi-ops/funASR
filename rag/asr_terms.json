@@ -1,0 +1,82 @@
+[
+  {
+    "id": "term-1",
+    "term": "FunASR",
+    "aliases": ["fun asr", "风阿瑟", "芬阿瑟"],
+    "description": "一个用于语音识别和语音相关任务的工具与框架。",
+    "topic": "asr",
+    "weight": 1.0
+  },
+  {
+    "id": "term-2",
+    "term": "SenseVoiceSmall",
+    "aliases": ["sense voice small", "森斯沃伊斯mall", "声音模型small"],
+    "description": "一个常见的语音识别模型名称，可用于转写任务。",
+    "topic": "asr_model",
+    "weight": 1.0
+  },
+  {
+    "id": "term-3",
+    "term": "embedding",
+    "aliases": ["向量化", "文本向量", "嵌入表示"],
+    "description": "把文本映射成向量表示，便于做语义相似度计算和召回。",
+    "topic": "rag",
+    "weight": 0.9
+  },
+  {
+    "id": "term-4",
+    "term": "bge-m3",
+    "aliases": ["bgm3", "b g e m 3", "bge m3"],
+    "description": "一个多语言 embedding 模型，常用于语义检索和知识库召回。",
+    "topic": "embedding_model",
+    "weight": 1.0
+  },
+  {
+    "id": "term-5",
+    "term": "Chroma",
+    "aliases": ["chroma db", "向量数据库chroma", "库roma"],
+    "description": "一个本地可运行的向量数据库，适合做知识库检索实验。",
+    "topic": "vector_db",
+    "weight": 0.9
+  },
+  {
+    "id": "term-6",
+    "term": "rerank",
+    "aliases": ["重排", "重新排序", "精排"],
+    "description": "在召回之后，对候选结果进行第二阶段排序，提高最终命中质量。",
+    "topic": "retrieval",
+    "weight": 0.9
+  },
+  {
+    "id": "term-7",
+    "term": "WebSocket",
+    "aliases": ["web socket", "实时连接", "长连接"],
+    "description": "一种适合实时收发消息的协议，常用于流式语音识别。",
+    "topic": "streaming",
+    "weight": 0.8
+  },
+  {
+    "id": "term-8",
+    "term": "PCM",
+    "aliases": ["pcm16", "原始音频流", "裸音频"],
+    "description": "一种常见的原始音频数据格式，实时语音传输中经常使用。",
+    "topic": "audio",
+    "weight": 0.8
+  },
+  {
+    "id": "term-9",
+    "term": "chunk_size",
+    "aliases": ["chunk size", "分块大小", "音频分块参数"],
+    "description": "流式 ASR 中控制每次推理窗口大小的参数。",
+    "topic": "streaming",
+    "weight": 0.9
+  },
+  {
+    "id": "term-10",
+    "term": "encoder_chunk_look_back",
+    "aliases": ["编码器回看", "look back", "历史窗口"],
+    "description": "流式 ASR 中编码器可回看的历史上下文参数。",
+    "topic": "streaming",
+    "weight": 0.8
+  }
+]
